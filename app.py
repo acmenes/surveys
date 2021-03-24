@@ -11,7 +11,7 @@ debug = DebugToolbarExtension(app)
 # not sure how to stop the user from visiting a question out of order
 # I think I need to see how session works more
 
-# USER_RESPONSES = "responses"
+USER_RESPONSES = "responses"
 responses = []
 
 @app.route('/old-home-page')
@@ -34,22 +34,26 @@ def home_page():
 # why do I have to write it out like int:id?
 def question(id):
     curr_id = id - 1
+    # if len(USER_RESPONSES) != id:
+    #     flask(f"Please do not answer out of order)
+    #     return redirect(f"/questions/{len(responses)})
     if id > len(satisfaction_survey.questions):
         return redirect('/not-found')
     else:
         return render_template('questions.html', survey_q1=satisfaction_survey.questions[(curr_id)].question, choices=satisfaction_survey.questions[(curr_id)].choices)
 
-@app.route('/questions/0', methods=["POST"])
+@app.route('/questions-start', methods=["POST", "GET"])
 def initialize():
-    # session[USER_RESPONSES] = []
+    # it doesn't redirect unless I add GET as a method for some reason
+    session["responses"] = []
     return redirect('/questions/1')
 
 @app.route('/answer', methods=["POST"])
 def submit_answer():
     choice = request.form['answer']
-    # responses = session[USER_RESPONSES]
+    responses = session[USER_RESPONSES]
     responses.append(choice)
-    # session[USER_RESPONSES] = responses
+    session[USER_RESPONSES] = responses
     if len(responses) == len(satisfaction_survey.questions):
         return redirect('/thank-you')
     else:
